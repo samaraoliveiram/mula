@@ -20,5 +20,5 @@ defmodule MulaDevWeb.Gettext do
 
   See the [Gettext Docs](https://hexdocs.pm/gettext) for detailed usage.
   """
-  use Gettext, otp_app: :mula_dev_web
+  use Gettext, otp_app: :mula_dev
 end

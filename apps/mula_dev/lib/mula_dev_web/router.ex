@@ -25,8 +25,8 @@ defmodule MulaDevWeb.Router do
   #   pipe_through :api
   # end
 
-  # Enable LiveDashboard in development
-  if Application.compile_env(:mula_dev_web, :dev_routes) do
+  # Enable LiveDashboard and Swoosh mailbox preview in development
+  if Application.compile_env(:mula_dev, :dev_routes) do
     # If you want to use the LiveDashboard in production, you should put
     # it behind authentication and allow only admins to access it.
     # If your application does not have an admins-only section yet,
@@ -38,6 +38,7 @@ defmodule MulaDevWeb.Router do
       pipe_through :browser
 
       live_dashboard "/dashboard", metrics: MulaDevWeb.Telemetry
+      forward "/mailbox", Plug.Swoosh.MailboxPreview
     end
   end
 end

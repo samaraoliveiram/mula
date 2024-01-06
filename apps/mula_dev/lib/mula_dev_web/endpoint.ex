@@ -1,13 +1,13 @@
 defmodule MulaDevWeb.Endpoint do
-  use Phoenix.Endpoint, otp_app: :mula_dev_web
+  use Phoenix.Endpoint, otp_app: :mula_dev
 
   # The session will be stored in the cookie and signed,
   # this means its contents can be read but not tampered with.
   # Set :encryption_salt if you would also like to encrypt it.
   @session_options [
     store: :cookie,
-    key: "_mula_dev_web_key",
-    signing_salt: "NROF1pRw",
+    key: "_mula_dev_key",
+    signing_salt: "a6NIgUk8",
     same_site: "Lax"
   ]
 
@@ -19,7 +19,7 @@ defmodule MulaDevWeb.Endpoint do
   # when deploying your static files in production.
   plug Plug.Static,
     at: "/",
-    from: :mula_dev_web,
+    from: :mula_dev,
     gzip: false,
     only: MulaDevWeb.static_paths()
 
@@ -29,7 +29,7 @@ defmodule MulaDevWeb.Endpoint do
     socket "/phoenix/live_reload/socket", Phoenix.LiveReloader.Socket
     plug Phoenix.LiveReloader
     plug Phoenix.CodeReloader
-    plug Phoenix.Ecto.CheckRepoStatus, otp_app: :mula_dev_web
+    plug Phoenix.Ecto.CheckRepoStatus, otp_app: :mula_dev
   end
 
   plug Phoenix.LiveDashboard.RequestLogger,
