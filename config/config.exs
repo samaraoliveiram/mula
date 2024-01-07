@@ -40,10 +40,29 @@ config :mula_dev, MulaDevWeb.Endpoint,
 # at the `config/runtime.exs`.
 config :mula_dev, MulaDev.Mailer, adapter: Swoosh.Adapters.Local
 
+esbuild = fn args ->
+  [
+    args: ~w(./js/mula --bundle) ++ args,
+    cd: Path.expand("../apps/mula/assets", __DIR__),
+    env: %{"NODE_PATH" => Path.expand("../deps", __DIR__)}
+  ]
+end
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",
-  default: [
+  module: esbuild.(~w(--format=esm --sourcemap --outfile=../priv/static/mula.esm.js)),
+  main: esbuild.(~w(--format=cjs --sourcemap --outfile=../priv/static/mula.cjs.js)),
+  cdn:
+    esbuild.(
+      ~w(--format=iife --target=es2016 --global-name=Mula --outfile=../priv/static/mula.js)
+    ),
+  cdn_min:
+    esbuild.(
+      ~w(--format=iife --target=es2016 --global-name=Mula --minify --outfile=../priv/static/mula.min.js)
+    ),
+  # Development app :mula_dev
+  mula_dev: [
     args:
       ~w(js/app.js --bundle --target=es2017 --outdir=../priv/static/assets --external:/fonts/* --external:/images/*),
     cd: Path.expand("../apps/mula_dev/assets", __DIR__),

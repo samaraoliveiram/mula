@@ -1,0 +1,7 @@
+{
+  "version": 3,
+  "sources": ["../../assets/js/mula/index.js"],
+  "sourcesContent": ["export default { hello: \"ahfsfhs\" }\n"],
+  "mappings": ";;;;;;;;;;;;;;;;;;;AAAA;AAAA;AAAA;AAAA;AAAA;AAAA,IAAO,eAAQ,EAAE,OAAO,UAAU;",
+  "names": []
+}

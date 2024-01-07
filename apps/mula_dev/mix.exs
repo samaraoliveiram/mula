@@ -71,8 +71,8 @@ defmodule MulaDev.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       test: ["ecto.create --quiet", "ecto.migrate --quiet", "test"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
-      "assets.build": ["tailwind default", "esbuild default"],
-      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"]
+      "assets.build": ["tailwind default", "esbuild mula_dev"],
+      "assets.deploy": ["tailwind default --minify", "esbuild mula_dev --minify", "phx.digest"]
     ]
   end
 end

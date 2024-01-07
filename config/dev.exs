@@ -25,7 +25,7 @@ config :mula_dev, MulaDevWeb.Endpoint,
   debug_errors: true,
   secret_key_base: "OOkNT5yvCcFBTgEYeCvKZucSOtRUg3JAiH92wex04tsuTaZ+4dUQnWCJNncY+fHW",
   watchers: [
-    esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]},
+    esbuild: {Esbuild, :install_and_run, [:mula_dev, ~w(--sourcemap=inline --watch)]},
     tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]}
   ]
 

@@ -1,0 +1,26 @@
+{
+  "name": "mula",
+  "version": "0.1.0",
+  "description": "The Phoenix LiveView headless component library",
+  "license": "MIT",
+  "module": "./priv/static/mula.esm.js",
+  "main": "./priv/static/mula.cjs.js",
+  "unpkg": "./priv/static/mula.min.js",
+  "jsdelivr": "./priv/static/mula.min.js",
+  "exports": {
+    "import": "./priv/static/mula.esm.js",
+    "require": "./priv/static/mula.cjs.js"
+  },
+  "contributors": ["Samara Motta", "Giovanni Francischelli"],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/samaraoliveiram/mula.git"
+  },
+  "files": [
+    "README.md",
+    "LICENSE.md",
+    "package.json",
+    "priv/static/*",
+    "assets/js/mula/*"
+  ]
+}

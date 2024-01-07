@@ -15,10 +15,11 @@ defmodule Mula.MixProject do
       lockfile: "../../mix.lock",
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
-      description: "The headless component library tailored for Phoenix LiveView",
+      description: "The Phoenix LiveView headless component library",
       package: package(),
       deps: deps(),
-      docs: docs()
+      docs: docs(),
+      aliases: aliases()
     ]
   end
 
@@ -34,12 +35,15 @@ defmodule Mula.MixProject do
       maintainers: ["Samara Motta", "Giovanni Francischelli"],
       licenses: ["MIT"],
       links: %{"Github" => @source_url},
-      files: ~w(mix.exs lib README.md LICENSE.md)
+      files:
+        ~w(assets/js lib priv) ++
+          ~w(mix.exs package.json README.md LICENSE.md)
     ]
   end
 
   defp deps do
     [
+      {:esbuild, "~> 0.8", only: :dev},
       {:ex_doc, ">= 0.0.0", only: [:dev], runtime: false}
     ]
   end
@@ -53,6 +57,13 @@ defmodule Mula.MixProject do
       extras: [
         "README.md"
       ]
+    ]
+  end
+
+  defp aliases do
+    [
+      "assets.build": ["esbuild module", "esbuild cdn", "esbuild cdn_min", "esbuild main"],
+      "assets.watch": ["esbuild module --watch"]
     ]
   end
 end
