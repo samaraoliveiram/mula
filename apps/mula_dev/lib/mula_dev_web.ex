@@ -54,6 +54,8 @@ defmodule MulaDevWeb do
       use Phoenix.LiveView,
         layout: {MulaDevWeb.Layouts, :app}
 
+      import Mula.Components
+
       unquote(html_helpers())
     end
   end
