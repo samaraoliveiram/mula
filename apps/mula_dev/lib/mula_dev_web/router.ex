@@ -18,6 +18,8 @@ defmodule MulaDevWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :home
+    live "/select", SelectLive
+    live "/listbox", ListboxLive
   end
 
   # Other scopes may use custom stacks.
