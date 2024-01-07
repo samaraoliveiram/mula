@@ -58,7 +58,10 @@ config :mula_dev, MulaDevWeb.Endpoint,
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/mula_dev_web/(controllers|live|components)/.*(ex|heex)$"
+      ~r"lib/mula_dev_web/(controllers|live|components)/.*(ex|heex)$",
+      # Reload when mula gets updated
+      ~r"../mula/assets/js/.*(js|css|png|jpeg|jpg|gif|svg)$",
+      ~r"../mula/lib/.*(ex|heex)$"
     ]
   ]
 

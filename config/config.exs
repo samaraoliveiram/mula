@@ -22,6 +22,7 @@ config :mula_dev,
 
 # Configures the endpoint
 config :mula_dev, MulaDevWeb.Endpoint,
+  reloadable_apps: [:mula],
   url: [host: "localhost"],
   adapter: Phoenix.Endpoint.Cowboy2Adapter,
   render_errors: [
@@ -92,4 +93,3 @@ config :phoenix, :json_library, Jason
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
 import_config "#{config_env()}.exs"
-
