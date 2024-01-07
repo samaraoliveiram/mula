@@ -44,7 +44,8 @@ defmodule Mula.MixProject do
   defp deps do
     [
       {:esbuild, "~> 0.8", only: :dev},
-      {:ex_doc, ">= 0.0.0", only: [:dev], runtime: false}
+      {:ex_doc, ">= 0.0.0", only: [:dev], runtime: false},
+      {:phoenix_live_view, "~> 0.20"}
     ]
   end
 
