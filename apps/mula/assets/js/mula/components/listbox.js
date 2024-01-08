@@ -7,13 +7,13 @@ const listbox = {
     });
 
     this.el.addEventListener("focus", (event) => {
-      if (!this.multiple) {
-        const nextFocusedEl =
-          this.el.querySelector("[aria-selected=true]") ||
-          this.el.querySelector("[role=option]:not([disabled])");
+      // focus is set on the first returned selected option or the first option
+      // not disabled
+      const nextFocusedEl =
+        this.el.querySelector("[aria-selected=true]") ||
+        this.el.querySelector("[role=option]:not([disabled])");
 
-        this.updateDataFocused(nextFocusedEl);
-      }
+      this.updateDataFocused(nextFocusedEl);
     });
 
     this.el.addEventListener("mula:listbox:clicked", (event) => {
