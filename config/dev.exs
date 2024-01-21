@@ -60,10 +60,21 @@ config :mula_dev, MulaDevWeb.Endpoint,
       ~r"priv/gettext/.*(po)$",
       ~r"lib/mula_dev_web/(controllers|live|components)/.*(ex|heex)$",
       # Reload when mula gets updated
-      ~r"../mula/assets/js/.*(js|css|png|jpeg|jpg|gif|svg)$",
-      ~r"../mula/lib/.*(ex|heex)$"
+      ~r"mula/assets/js/.*(js|css|png|jpeg|jpg|gif|svg)$",
+      ~r"mula/lib/.*(ex|heex)$"
     ]
   ]
+
+root_path =
+  __ENV__.file
+  |> Path.dirname()
+  |> Path.join("..")
+  |> Path.expand()
+
+config :phoenix_live_reload, :dirs, [
+  Path.join([root_path, "apps", "mula"]),
+  Path.join([root_path, "apps", "mula_dev"])
+]
 
 # Enable dev routes for dashboard and mailbox
 config :mula_dev, dev_routes: true
