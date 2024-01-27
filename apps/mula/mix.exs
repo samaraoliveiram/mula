@@ -63,6 +63,7 @@ defmodule Mula.MixProject do
 
   defp aliases do
     [
+      "setup": ["cmd echo"],
       "assets.build": ["esbuild module", "esbuild cdn", "esbuild cdn_min", "esbuild main"],
       "assets.watch": ["esbuild module --watch"]
     ]
