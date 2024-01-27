@@ -23,3 +23,7 @@ erl_crash.dump
 /tmp/
 
 
+# E2E tests
+apps/mula_dev/test/e2e/test-results/
+/playwright-report/
+node_modules

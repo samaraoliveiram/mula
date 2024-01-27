@@ -1,0 +1,8 @@
+{
+  "devDependencies": {
+    "@playwright/test": "^1.41.1"
+  },
+  "scripts": {
+    "e2e:test": "cd apps/mula_dev/test/e2e && npx playwright test"
+  }
+}

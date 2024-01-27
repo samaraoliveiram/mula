@@ -47,5 +47,12 @@ defmodule MulaDevWeb.Endpoint do
   plug Plug.MethodOverride
   plug Plug.Head
   plug Plug.Session, @session_options
+  plug :health_check
   plug MulaDevWeb.Router
+
+  defp health_check(%{request_path: "/health"} = conn, _opts) do
+    conn |> Plug.Conn.send_resp(200, "OK") |> Plug.Conn.halt()
+  end
+
+  defp health_check(conn, _opts), do: conn
 end
