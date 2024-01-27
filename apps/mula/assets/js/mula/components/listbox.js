@@ -16,13 +16,13 @@ const listbox = {
       this.updateFocusedOption(nextOption);
     });
 
-    this.el.addEventListener("mula:listbox:clicked", (event) => {
+    this.el.addEventListener("mula:listbox:selected", (event) => {
       this.toggleSelectedOption(event.target);
       this.updateFocusedOption(event.target);
     });
 
     this.el.addEventListener("keydown", (event) => {
-      const key = event.key;
+      const { key, code } = event;
       const focusedOption = this.el.querySelector("[data-focused=true]");
       let nextFocusedOption;
 
@@ -34,6 +34,9 @@ const listbox = {
         nextFocusedOption = focusedOption.nextElementSibling;
       } else if (key == "ArrowUp") {
         nextFocusedOption = focusedOption.previousElementSibling;
+      } else if (code == "Space") {
+        const el = focusedOption;
+        this.liveSocket.execJS(el, el.getAttribute("data-select"));
       }
 
       this.updateFocusedOption(nextFocusedOption || focusedOption);

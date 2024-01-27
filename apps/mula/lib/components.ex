@@ -37,8 +37,9 @@ defmodule Mula.Components do
         role="option"
         id={item[:id] || "#{@id}-#{i}"}
         class={item[:class]}
-        phx-click={JS.dispatch("mula:listbox:clicked")}
         aria-selected="false"
+        data-select={JS.dispatch("mula:listbox:selected")}
+        phx-click={JS.exec("data-select")}
       >
         <%= render_slot(item) %>
       </div>
