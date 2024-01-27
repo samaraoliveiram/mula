@@ -18,7 +18,7 @@ defmodule MulaDevWeb.ListboxLive do
 
       <div>
         <h1>Multiple Select</h1>
-        <.listbox id="multiple" multiple class="bg-gray-300" aria-label="Favorite color">
+        <.listbox id="multiple" multiple class="bg-gray-300" aria-label="Favorite colors">
           <:item class="data-[selected=true]:bg-blue-500 data-[focused]:outline-dashed outline-pink-500">
             Green
           </:item>
