@@ -6,24 +6,27 @@ defmodule MulaDevWeb.ListboxLive do
     <div class="flex flex-col gap-4">
       <div>
         <h1>Single select</h1>
-        <.listbox id="single" class="bg-gray-300" aria-label="Favorite number">
+        <.listbox id="single" class="bg-gray-300" aria-label="Favorite color">
           <:item
-            :for={item <- [1, 2, 3]}
+            :for={color <- @colors}
             class="data-[selected=true]:bg-blue-500 data-[focused]:outline-dashed outline-pink-500"
           >
-            <%= item %>
+            <%= color %>
           </:item>
         </.listbox>
       </div>
 
       <div>
         <h1>Multiple Select</h1>
-        <.listbox id="multiple" multiple class="bg-gray-300" aria-label="Favorite animal">
+        <.listbox id="multiple" multiple class="bg-gray-300" aria-label="Favorite color">
           <:item class="data-[selected=true]:bg-blue-500 data-[focused]:outline-dashed outline-pink-500">
-            Dog
+            Green
           </:item>
-          <:item class="data-[selected=true]:bg-blue-500 data-[focused]:outline-dashed outline-pink-500">
-            Cat
+          <:item
+            :for={color <- @colors}
+            class="data-[selected=true]:bg-blue-500 data-[focused]:outline-dashed outline-pink-500"
+          >
+            <%= color %>
           </:item>
         </.listbox>
       </div>
@@ -32,6 +35,6 @@ defmodule MulaDevWeb.ListboxLive do
   end
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, selected_keys: [1])}
+    {:ok, assign(socket, colors: ["Black", "Blue", "Red"])}
   end
 end
