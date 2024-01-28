@@ -14,8 +14,6 @@ defmodule Mula.Components do
     attr(:class, :string)
   end
 
-  # attr :selected_keys, :list, default: []
-  # attr :on_selection_change, :any
   attr(:id, :string, required: true)
   attr(:multiple, :boolean, default: false)
   attr(:rest, :global, doc: "the arbitrary HTML attributes to add to the select container")
