@@ -11,13 +11,13 @@ defmodule Mula.Components do
   @doc """
   """
   slot :option, doc: "Slot for the listbox option" do
-    attr(:id, :any, doc: "The option id")
-    attr(:class, :any)
+    attr :id, :any, doc: "The option id"
+    attr :class, :any
   end
 
-  attr(:id, :string, required: true)
-  attr(:multiple, :boolean, default: false)
-  attr(:rest, :global, doc: "the arbitrary HTML attributes to add to the select container")
+  attr :id, :string, required: true
+  attr :multiple, :boolean, default: false
+  attr :rest, :global, doc: "the arbitrary HTML attributes to add to the select container"
   # todo: add feat to give an option id to be selected on focus
 
   def listbox(assigns) do
@@ -44,9 +44,9 @@ defmodule Mula.Components do
     """
   end
 
-  attr(:id, :string, required: true)
-  attr(:rest, :global, doc: "the arbitrary HTML attributes to add to the select container")
-  slot(:inner_block, doc: "the optional inner block that renders the")
+  attr :id, :string, required: true
+  attr :rest, :global, doc: "the arbitrary HTML attributes to add to the select container"
+  slot :inner_block, doc: "the optional inner block that renders the"
 
   @spec select(map()) :: Phoenix.LiveView.Rendered.t()
   def select(assigns) do
@@ -65,8 +65,8 @@ defmodule Mula.Components do
     """
   end
 
-  attr(:rest, :global, doc: "the arbitrary HTML attributes to add to the select container")
-  slot(:inner_block, doc: "the optional inner block that renders the")
+  attr :rest, :global, doc: "the arbitrary HTML attributes to add to the select container"
+  slot :inner_block, doc: "the optional inner block that renders the"
 
   def popover(assigns) do
     ~H"""
