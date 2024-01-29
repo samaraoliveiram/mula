@@ -10,8 +10,9 @@ defmodule Mula.Components do
 
   @doc """
   """
-  slot :item do
-    attr(:class, :string)
+  slot :option, doc: "Slot for the listbox option" do
+    attr(:id, :any, doc: "The option id")
+    attr(:class, :any)
   end
 
   attr(:id, :string, required: true)
@@ -31,15 +32,13 @@ defmodule Mula.Components do
       {@rest}
     >
       <div
-        :for={{item, i} <- Enum.with_index(@item)}
+        :for={{option, i} <- Enum.with_index(@option)}
         role="option"
-        id={item[:id] || "#{@id}-#{i}"}
-        class={item[:class]}
+        id={option[:id] || "#{@id}-#{i}"}
+        class={option[:class]}
         aria-selected="false"
-        data-select={JS.dispatch("mula:listbox:select")}
-        phx-click={JS.exec("data-select")}
       >
-        <%= render_slot(item) %>
+        <%= render_slot(option) %>
       </div>
     </div>
     """
