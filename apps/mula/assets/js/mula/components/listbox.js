@@ -9,6 +9,7 @@ const isMacOS = () => {
 const Listbox = {
   mounted() {
     this.multiple = this.el.hasAttribute("aria-multiselectable");
+    this.selectedOption = null;
 
     this._handleDocumentFocus = this.handleDocumentFocus.bind(this);
     this._handleDocumentKeyDown = this.handleDocumentKeyDown.bind(this);
@@ -20,8 +21,8 @@ const Listbox = {
     this.el.addEventListener("focus", this._handleDocumentFocus, true);
     this.el.addEventListener("mouseup", this._handleClick, true);
     // Workaround to detect if focus comes from mouse or keyboard
-    this.el.addEventListener("mousedown", () => this.mouseDown = true)
-    this.el.addEventListener("mouseup", () => this.mouseDown = false)
+    this.el.addEventListener("mousedown", () => (this.mouseDown = true));
+    this.el.addEventListener("mouseup", () => (this.mouseDown = false));
   },
 
   updated() {
@@ -32,6 +33,9 @@ const Listbox = {
     this.el.removeEventListener("keydown", this._handleDocumentKeyDown, true);
     this.el.removeEventListener("blur", this._handleDocumentBlur, true);
     this.el.removeEventListener("focus", this._handleDocumentFocus, true);
+    this.el.removeEventListener("mouseup", this._handleClick, true);
+    this.el.removeEventListener("mousedown", () => (this.mouseDown = true));
+    this.el.removeEventListener("mouseup", () => (this.mouseDown = false));
   },
 
   handleDocumentKeyDown(event) {
@@ -39,26 +43,30 @@ const Listbox = {
     const cmd = isMacOS() ? metaKey : ctrlKey;
 
     const focusedOption = this.el.querySelector("[data-focused=true]");
+    const selectedOption = this.selectedOption;
     let nextFocusedOption;
 
     if (key == " " || key == "Enter") {
       this.selectOption(focusedOption);
-      return;
-    }
 
-    if (key == "Home") {
+      if (shiftKey && selectedOption && selectedOption != focusedOption) {
+        selectBetweenChilds(this.el, selectedOption, focusedOption);
+      }
+    } else if (key == "Home") {
       nextFocusedOption = this.getFirstAvailableOption();
 
       if (cmd && shiftKey && this.multiple) {
-        this.iterateOverSiblings(focusedOption, "previous", this.selectOption.bind(this));
-        this.selectOption(focusedOption)
+        this.selectOption(focusedOption);
+        this.selectOption(nextFocusedOption);
+        this.selectBetweenChilds(this.el, nextFocusedOption, focusedOption);
       }
     } else if (key == "End") {
       nextFocusedOption = this.getLastAvailableOption();
 
       if (cmd && shiftKey && this.multiple) {
-        this.iterateOverSiblings(focusedOption, "next", this.selectOption.bind(this));
-        this.selectOption(focusedOption)
+        this.selectOption(focusedOption);
+        this.selectOption(nextFocusedOption);
+        this.selectBetweenChilds(this.el, nextFocusedOption, focusedOption);
       }
     } else if (key == "ArrowDown") {
       nextFocusedOption = focusedOption.nextElementSibling;
@@ -75,6 +83,7 @@ const Listbox = {
   handleDocumentBlur(event) {
     this.removeFocusedOption();
     this.removeFocusVisibleOption();
+    this.selectedOption = null;
   },
 
   handleDocumentFocus(event) {
@@ -97,7 +106,7 @@ const Listbox = {
   },
 
   handleClick(event) {
-    this.selectOption(event.target)
+    this.selectOption(event.target);
     this.removeFocusVisibleOption();
   },
 
@@ -128,11 +137,13 @@ const Listbox = {
   },
 
   removeFocusVisibleOption() {
-    this.el.querySelector("[data-focus-visible='true']")
+    this.el
+      .querySelector("[data-focus-visible='true']")
       ?.removeAttribute("data-focus-visible");
   },
 
   selectOption(el) {
+    this.selectedOption = el;
     const isUnselected = el.getAttribute("aria-selected") != "true";
 
     if (!this.multiple && isUnselected == true) {
@@ -152,13 +163,18 @@ const Listbox = {
     this.updateFocusedOption(el);
   },
 
-  iterateOverSiblings(el, direction, callback) {
-    const key =
-      direction == "next" ? "nextElementSibling" : "previousElementSibling";
+  selectBetweenChilds(parent, child1, child2) {
+    let between = false;
 
-    while (el[key] != null) {
-      el = el[key];
-      callback(el);
+    for (let el of parent.children) {
+      if (el == child1 || el == child2) {
+        between = !between;
+        continue;
+      }
+
+      if (between) {
+        this.selectOption(el);
+      }
     }
   },
 };

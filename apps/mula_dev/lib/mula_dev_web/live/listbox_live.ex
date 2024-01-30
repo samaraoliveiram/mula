@@ -52,6 +52,6 @@ defmodule MulaDevWeb.ListboxLive do
   end
 
   def mount(_params, _session, socket) do
-    {:ok, assign(socket, colors: ["Black", "Blue", "Red"])}
+    {:ok, assign(socket, colors: ["Black", "Blue", "Red", "White"])}
   end
 end
