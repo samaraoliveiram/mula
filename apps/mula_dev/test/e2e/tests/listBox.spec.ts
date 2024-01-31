@@ -33,7 +33,7 @@ test.describe('Single Component Test', () => {
       console.log(expectedColor)
       await expect.soft(expectedColor).toHaveAttribute("aria-selected", "true")
       await expect.soft(expectedColor).toHaveAttribute("data-focused", "true");
-
+      await expect(listbox).toHaveAttribute("aria-activedescendant", await expectedColor.evaluate(node => node.id))
 
     });
 
