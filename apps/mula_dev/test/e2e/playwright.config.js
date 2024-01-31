@@ -32,9 +32,9 @@ const config = {
     {
       name: "webkit",
       use: { ...devices["Desktop Safari"] },
-    }
+    },
   ],
-  outputDir: "test-results"
+  outputDir: "test-results",
 };
 
 module.exports = config;
