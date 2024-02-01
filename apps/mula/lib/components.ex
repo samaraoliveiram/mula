@@ -100,10 +100,28 @@ defmodule Mula.Components do
   attr(:value_text_formatter, :any,
     default: nil,
     doc:
-      "a function that receives the calculated percentage and returns a string, it's used to set the aria-valuetext and the value_text returned"
+      "a function that receives the calculated percentage and returns a string, it's used to set the aria-valuetext attribute and the value_text returned"
   )
 
   slot(:inner_block, doc: "the optional inner block that renders the")
+
+  def meter(%{max_value: max_value, min_value: min_value}) when min_value > max_value,
+    do:
+      raise(ArgumentError,
+        message: "[Mula.Components.meter/1] max_value must be greater than or equal to min_value"
+      )
+
+  def meter(%{max_value: max_value, value: value}) when value > max_value,
+    do:
+      raise(ArgumentError,
+        message: "[Mula.Components.meter/1] value must be lesser than or equal to max_value"
+      )
+
+  def meter(%{min_value: min_value, value: value}) when value < min_value,
+    do:
+      raise(ArgumentError,
+        message: "[Mula.Components.meter/1] value must be greater than or equal to value"
+      )
 
   def meter(assigns) do
     %{
@@ -113,43 +131,19 @@ defmodule Mula.Components do
       value_text_formatter: value_text_formatter
     } = assigns
 
-    unless max_value > min_value do
-      raise ArgumentError,
-        message: "[Mula.Components.meter/1] max_value must be greater than min_value"
-    end
-
-    unless max_value >= value do
-      raise ArgumentError,
-        message: "[Mula.Components.meter/1] max_value must be greater than or equal to value"
-    end
-
-    unless value >= min_value do
-      raise ArgumentError,
-        message: "[Mula.Components.meter/1] min_value must be lesser than or equal to value"
-    end
-
     percentage = (value - min_value) / (max_value - min_value) * 100
-
-    value_text =
-      unless is_nil(value_text_formatter),
-        do: apply(value_text_formatter, [percentage]),
-        else: "#{percentage}%"
 
     assigns =
       assign(assigns, %{
-        value: value,
-        min_value: min_value,
-        max_value: max_value,
         percentage: percentage,
-        value_text: value_text
+        value_text:
+          (value_text_formatter && value_text_formatter.(percentage)) || "#{percentage}%"
       })
 
     ~H"""
     <div role="meter" aria-valuenow={@value} aria-valuemin={@min_value} aria-valuemax={@max_value} aria-valuetext={@value_text}>
-      <%= render_slot(@inner_block, %{min_value: @min_value, max_value: @max_value, percentage: @percentage, value_text: @value_text}) %>
+      <%= render_slot(@inner_block, %{percentage: @percentage, value_text: @value_text}) %>
     </div>
     """
   end
-
-  defp default_value_text_formatter(value_text), do: "#{value_text}%"
 end
