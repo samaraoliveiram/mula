@@ -78,4 +78,72 @@ defmodule Mula.Components do
     </div>
     """
   end
+
+  attr(:value, :float,
+    required: true,
+    doc:
+      "the value represented on the meter, must be between min_value and max_value, if min_value and max_value are not passed, value will be a plain percentage"
+  )
+
+  attr(:max_value, :float,
+    default: 100.0,
+    doc:
+      "the maximun value of the interval represented on the meter, must be greater than min_value, must be greater than or equal value"
+  )
+
+  attr(:min_value, :float,
+    default: 0.0,
+    doc:
+      "the minimun value of the interval represented on the meter, must be lesser than max_value, must be lesser than or equal value"
+  )
+
+  attr(:value_text_formatter, :any,
+    default: nil,
+    doc:
+      "a function that receives the calculated percentage and returns a string, it's used to set the aria-valuetext attribute and the value_text returned"
+  )
+
+  slot(:inner_block, doc: "the optional inner block that renders the")
+
+  def meter(%{max_value: max_value, min_value: min_value}) when min_value > max_value,
+    do:
+      raise(ArgumentError,
+        message: "[Mula.Components.meter/1] max_value must be greater than or equal to min_value"
+      )
+
+  def meter(%{max_value: max_value, value: value}) when value > max_value,
+    do:
+      raise(ArgumentError,
+        message: "[Mula.Components.meter/1] value must be lesser than or equal to max_value"
+      )
+
+  def meter(%{min_value: min_value, value: value}) when value < min_value,
+    do:
+      raise(ArgumentError,
+        message: "[Mula.Components.meter/1] value must be greater than or equal to value"
+      )
+
+  def meter(assigns) do
+    %{
+      value: value,
+      max_value: max_value,
+      min_value: min_value,
+      value_text_formatter: value_text_formatter
+    } = assigns
+
+    percentage = (value - min_value) / (max_value - min_value) * 100
+
+    assigns =
+      assign(assigns, %{
+        percentage: percentage,
+        value_text:
+          (value_text_formatter && value_text_formatter.(percentage)) || "#{percentage}%"
+      })
+
+    ~H"""
+    <div role="meter" aria-valuenow={@value} aria-valuemin={@min_value} aria-valuemax={@max_value} aria-valuetext={@value_text}>
+      <%= render_slot(@inner_block, %{percentage: @percentage, value_text: @value_text}) %>
+    </div>
+    """
+  end
 end

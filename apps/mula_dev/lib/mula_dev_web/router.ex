@@ -20,6 +20,7 @@ defmodule MulaDevWeb.Router do
     get "/", PageController, :home
     live "/select", SelectLive
     live "/listbox", ListboxLive
+    live "/meter", MeterLive
   end
 
   # Other scopes may use custom stacks.
