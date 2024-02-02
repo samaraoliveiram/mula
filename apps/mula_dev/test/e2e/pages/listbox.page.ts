@@ -24,7 +24,7 @@ export class ListBoxPage extends BasePage {
   async selectSingleElement(name: any) {
 
     await this.singleSelectTitle.getByRole('option', { name: name }).click();
-    console.log("clicked on black");
+    console.log("clicked on " + name);
 
   }
 
