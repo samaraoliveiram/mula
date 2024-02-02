@@ -35,3 +35,7 @@ mula_dev-*.tar
 npm-debug.log
 /assets/node_modules/
 
+#Ignore test reports
+/test-results/
+.env
+
