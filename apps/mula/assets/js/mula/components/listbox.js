@@ -8,6 +8,8 @@ const isMacOS = () => {
 
 const Listbox = {
   mounted() {
+    const self = this;
+
     this.multiple = this.el.hasAttribute("aria-multiselectable");
     this.selectedOption = null;
 
@@ -20,13 +22,27 @@ const Listbox = {
     this.el.addEventListener("blur", this._handleDocumentBlur, true);
     this.el.addEventListener("focus", this._handleDocumentFocus, true);
     this.el.addEventListener("mouseup", this._handleClick, true);
+
     // Workaround to detect if focus comes from mouse or keyboard
-    this.el.addEventListener("mousedown", () => (this.mouseDown = true));
-    this.el.addEventListener("mouseup", () => (this.mouseDown = false));
+    this.el.addEventListener("mousedown", () => this.mouseDown = true)
+    this.el.addEventListener("mouseup", () => this.mouseDown = false)
+
+    this.selectOptionsFromProps()
+
+    // HTMLElement Interoperability Extension Callbacks --------------------------
+    // 
+    // The `listbox` element is queried by higher-level components like `select`.
+    
+    // This function allows a parent element to control how to focus listbox items
+    this.el.focusChild = function(opts = {}) {
+      self.focusVisible = opts.focusVisible
+      self.el.focus();
+    }
   },
 
   updated() {
-    this.multiple = this.el.hasAttribute(selectEvent);
+    this.selectOptionsFromProps()
+    // this.multiple = this.el.hasAttribute(selectEvent);
   },
 
   destroyed() {
@@ -36,6 +52,22 @@ const Listbox = {
     this.el.removeEventListener("mouseup", this._handleClick, true);
     this.el.removeEventListener("mousedown", () => (this.mouseDown = true));
     this.el.removeEventListener("mouseup", () => (this.mouseDown = false));
+  },
+
+  selectOptionsFromProps() {
+    const selectedValue = this.el.getAttribute("data-selected-value");
+
+    if (selectedValue) {
+      const optionToSelect = this.el.querySelector(`[role='option'][data-value='${selectedValue}']`)
+
+      if (!optionToSelect) {
+        console.warn(`Option with value ${selectedValue} does not exist`)
+        return;
+      }
+
+      optionToSelect.setAttribute("aria-selected", true);
+      optionToSelect.setAttribute("data-selected", true);
+    }
   },
 
   handleDocumentKeyDown(event) {
@@ -50,7 +82,7 @@ const Listbox = {
       this.selectOption(focusedOption);
 
       if (shiftKey && selectedOption && selectedOption != focusedOption) {
-        selectBetweenChilds(this.el, selectedOption, focusedOption);
+        this.selectBetweenChilds(this.el, selectedOption, focusedOption);
       }
     } else if (key == "Home") {
       nextFocusedOption = this.getFirstAvailableOption();
@@ -95,9 +127,11 @@ const Listbox = {
 
     this.updateFocusedOption(nextOption);
 
-    if (!this.mouseDown) {
+
+    if (!this.mouseDown && !this.embedded && this.focusVisible != false) {
       // Only keyboard focus should update focus visible
       this.updateFocusVisibleOption(nextOption);
+      this.focusVisible = true
     }
   },
 
@@ -153,14 +187,15 @@ const Listbox = {
       }
     }
 
-    if (!this.multiple) {
-      this.el.dispatchEvent(new Event(EVENTS.UPDATED, { bubbles: true }));
-    }
-
     el.setAttribute("aria-selected", isUnselected);
     el.setAttribute("data-selected", isUnselected);
 
     this.updateFocusedOption(el);
+
+    if (!this.multiple) {
+      const value = isUnselected ? el.getAttribute("data-value") : null
+      this.el.dispatchEvent(new CustomEvent(EVENTS.UPDATED, { bubbles: true, detail: value }));
+    }
   },
 
   selectBetweenChilds(parent, child1, child2) {

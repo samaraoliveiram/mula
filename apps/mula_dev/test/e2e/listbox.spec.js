@@ -84,8 +84,14 @@ describe("Keyboard", () => {
     await listbox.press("ArrowDown")
     await assertOptionFocused(listbox, listbox.getByRole("option", { name: "Red" }))
 
+    await listbox.press("ArrowDown")
+    await assertOptionFocused(listbox, listbox.getByRole("option", { name: "White" }))
+
     // Idempotent when is the last option
     await listbox.press("ArrowDown")
+    await assertOptionFocused(listbox, listbox.getByRole("option", { name: "White" }))
+
+    await listbox.press("ArrowUp")
     await assertOptionFocused(listbox, listbox.getByRole("option", { name: "Red" }))
 
     await listbox.press("ArrowUp")
@@ -106,7 +112,7 @@ describe("Keyboard", () => {
     const listbox = page.getByRole("listbox", { name: "Favorite color", exact: true })
 
     await listbox.press("End")
-    await assertOptionFocused(listbox, listbox.getByRole("option", { name: "Red" }))
+    await assertOptionFocused(listbox, listbox.getByRole("option", { name: "White" }))
 
     await listbox.press("Home")
     await assertOptionFocused(listbox, listbox.getByRole("option", { name: "Black" }))
