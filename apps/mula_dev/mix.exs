@@ -67,6 +67,9 @@ defmodule MulaDev.MixProject do
   # See the documentation for `Mix` for more info on aliases.
   defp aliases do
     [
+      "e2e:ui": [
+        ~s(cmd "pwd && cd ./test/e2e && npx playwright test --ui --project chromium")
+      ],
       setup: ["deps.get", "ecto.setup", "assets.setup", "assets.build"],
       "ecto.setup": ["ecto.create", "ecto.migrate", "run priv/repo/seeds.exs"],
       "ecto.reset": ["ecto.drop", "ecto.setup"],
