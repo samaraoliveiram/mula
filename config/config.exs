@@ -22,7 +22,7 @@ config :mula_dev,
 
 # Configures the endpoint
 config :mula_dev, MulaDevWeb.Endpoint,
-  reloadable_apps: [:mula],
+  reloadable_apps: [:mula, :mula_dev],
   url: [host: "localhost"],
   adapter: Phoenix.Endpoint.Cowboy2Adapter,
   render_errors: [

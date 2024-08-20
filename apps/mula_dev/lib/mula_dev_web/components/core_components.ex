@@ -19,6 +19,77 @@ defmodule MulaDevWeb.CoreComponents do
   alias Phoenix.LiveView.JS
   import MulaDevWeb.Gettext
 
+  import Mula.Components
+
+  attr :id, :string, required: true
+  attr :multiple, :boolean, default: false
+  attr :value, :any, default: nil
+  attr :label, :any, default: false
+  attr :options, :list, required: true
+  attr :rest, :global
+
+  def my_listbox(assigns) do
+    ~H"""
+    <.listbox
+      id={@id}
+      multiple={@multiple}
+      selected_value={@value}
+      aria-label={@label}
+      class="flex flex-col gap-1 outline-none rounded-md border border-slate-400 p-2"
+      {@rest}
+    >
+      <:option
+        :for={option <- @options}
+        value={option}
+        class={[
+          "group/option relative flex justify-between items-center",
+          "w-full cursor-default select-none outline-none",
+          "cursor-pointer rounded-md p-2 text-slate-800",
+          "data-[focus-visible]:outline-violet-600 outline-offset-[-2px]",
+          "data-[selected='true']:bg-green-100"
+        ]}
+      >
+        <span><%= option %></span>
+        <.icon
+          name="hero-check-circle-solid"
+          class="text-green-500 h-6 w-6 group-data-[selected='true']/option:block hidden"
+        />
+      </:option>
+    </.listbox>
+    """
+  end
+
+  attr :id, :string, required: true
+  attr :label, :string, required: true
+  attr :value, :any, required: true
+  attr :options, :list, required: true
+  attr :on_change, :string, required: true
+  attr :multiple, :boolean, default: false
+
+  def my_select(assigns) do
+    ~H"""
+    <.select :let={select} id={@id} on_change={@on_change} multiple={@multiple}>
+      <label {select.label_attrs} class={["block leading-6 text-zinc-800 mb-2"]}>
+        <%= @label %>
+      </label>
+      <button
+        {select.trigger_attrs}
+        class={[
+          "flex h-9 w-full items-center justify-between whitespace-nowrap rounded-md border border-slate-400",
+          "bg-transparent px-3 py-2 text-sm shadow-sm ring-offset-background",
+          "placeholder:text-muted-foreground focus:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+          "disabled:cursor-not-allowed disabled:opacity-50"
+        ]}
+      >
+        <%= if(@value in [[], nil], do: "Select an option", else: @value) %>
+      </button>
+      <.popover class="mt-2">
+        <.my_listbox {select.listbox_attrs} options={@options} value={@value} />
+      </.popover>
+    </.select>
+    """
+  end
+
   @doc """
   Renders a modal.
 

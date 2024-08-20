@@ -1,46 +1,150 @@
-const listbox = {
+const EVENTS = {
+  UPDATED: "mula:listbox:updated",
+};
+
+const isMacOS = () => {
+  return /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform);
+};
+
+const Listbox = {
   mounted() {
+    const self = this;
+
     this.multiple = this.el.hasAttribute("aria-multiselectable");
+    this.lastSelectedOption = null;
 
-    this.el.addEventListener("blur", (event) => {
-      this.removeFocusedOption();
-    });
+    this._handleDocumentFocus = this.handleDocumentFocus.bind(this);
+    this._handleDocumentKeyDown = this.handleDocumentKeyDown.bind(this);
+    this._handleDocumentBlur = this.handleDocumentBlur.bind(this);
+    this._handleClick = this.handleClick.bind(this);
 
-    this.el.addEventListener("focus", (event) => {
-      // focus is set on the first returned selected option or the first option
-      // not disabled
-      const nextOption =
-        this.el.querySelector("[aria-selected=true]") ||
-        this.getFirstAvailableOption();
+    this.el.addEventListener("keydown", this._handleDocumentKeyDown, true);
+    this.el.addEventListener("blur", this._handleDocumentBlur, true);
+    this.el.addEventListener("focus", this._handleDocumentFocus, true);
+    this.el.addEventListener("mouseup", this._handleClick, true);
 
-      this.updateFocusedOption(nextOption);
-    });
+    // Workaround to detect if focus comes from mouse or keyboard
+    this.el.addEventListener("mousedown", () => (this.mouseDown = true));
+    this.el.addEventListener("mouseup", () => (this.mouseDown = false));
 
-    this.el.addEventListener("mula:listbox:selected", (event) => {
-      this.toggleSelectedOption(event.target);
-      this.updateFocusedOption(event.target);
-    });
+    this.selectOptionsFromProps();
 
-    this.el.addEventListener("keydown", (event) => {
-      const { key, code } = event;
-      const focusedOption = this.el.querySelector("[data-focused=true]");
-      let nextFocusedOption;
+    // HTMLElement Interoperability Extension Callbacks --------------------------
+    //
+    // The `listbox` element is queried by higher-level components like `select`.
 
-      if (key == "Home") {
-        nextFocusedOption = this.getFirstAvailableOption();
-      } else if (key == "End") {
-        nextFocusedOption = this.getLastAvailableOption();
-      } else if (key == "ArrowDown") {
-        nextFocusedOption = focusedOption.nextElementSibling;
-      } else if (key == "ArrowUp") {
-        nextFocusedOption = focusedOption.previousElementSibling;
-      } else if (code == "Space") {
-        const el = focusedOption;
-        this.liveSocket.execJS(el, el.getAttribute("data-select"));
+    // This function allows a parent element to control how to focus listbox items
+    this.el.focusChild = function (opts = {}) {
+      self.focusVisible = opts.focusVisible;
+      self.el.focus();
+    };
+  },
+
+  updated() {
+    this.selectOptionsFromProps();
+    // this.multiple = this.el.hasAttribute(selectEvent);
+  },
+
+  destroyed() {
+    this.el.removeEventListener("keydown", this._handleDocumentKeyDown, true);
+    this.el.removeEventListener("blur", this._handleDocumentBlur, true);
+    this.el.removeEventListener("focus", this._handleDocumentFocus, true);
+    this.el.removeEventListener("mouseup", this._handleClick, true);
+    this.el.removeEventListener("mousedown", () => (this.mouseDown = true));
+    this.el.removeEventListener("mouseup", () => (this.mouseDown = false));
+  },
+
+  selectOptionsFromProps() {
+    const selectedValue = this.el.getAttribute("data-selected-value");
+
+    if (selectedValue) {
+      const optionToSelect = this.el.querySelector(
+        `[role='option'][data-value='${selectedValue}']`
+      );
+
+      if (!optionToSelect) {
+        console.warn(`Option with value ${selectedValue} does not exist`);
+        return;
       }
 
-      this.updateFocusedOption(nextFocusedOption || focusedOption);
-    });
+      optionToSelect.setAttribute("aria-selected", true);
+      optionToSelect.setAttribute("data-selected", true);
+    }
+  },
+
+  handleDocumentKeyDown(event) {
+    const { metaKey, ctrlKey, shiftKey, key } = event;
+    const cmd = isMacOS() ? metaKey : ctrlKey;
+
+    const focusedOption = this.el.querySelector("[data-focused=true]");
+    const lastSelectedOption = this.lastSelectedOption;
+    let nextFocusedOption;
+
+    if (key == " " || key == "Enter") {
+      if (shiftKey && lastSelectedOption && this.multiple) {
+        this.listBetweenChilds(
+          this.el,
+          lastSelectedOption,
+          focusedOption
+        ).forEach((child) => {
+          this.updateOption(child, !this.isSelected(focusedOption));
+        });
+        this.updateOption(lastSelectedOption, !this.isSelected(focusedOption));
+      }
+
+      this.selectOption(focusedOption);
+    } else if (key == "Home" || key == "End") {
+      nextFocusedOption =
+        key == "Home"
+          ? this.getFirstAvailableOption()
+          : this.getLastAvailableOption();
+
+      if (cmd && shiftKey && this.multiple) {
+        this.selectOption(focusedOption);
+        this.selectOption(nextFocusedOption);
+        this.selectBetweenChilds(this.el, nextFocusedOption, focusedOption);
+      }
+    } else if (key == "ArrowDown") {
+      nextFocusedOption = focusedOption.nextElementSibling;
+    } else if (key == "ArrowUp") {
+      nextFocusedOption = focusedOption.previousElementSibling;
+    } else {
+      return;
+    }
+
+    this.updateFocusedOption(nextFocusedOption || focusedOption);
+    this.updateFocusVisibleOption(nextFocusedOption || focusedOption);
+  },
+
+  handleDocumentBlur(event) {
+    this.removeFocusedOption();
+    this.removeFocusVisibleOption();
+    // this.selectedOption = null;
+  },
+
+  handleDocumentFocus(event) {
+    // focus is set on the first returned selected option or the first option
+    // not disabled
+    const nextOption =
+      this.el.querySelector("[aria-selected=true]") ||
+      this.getFirstAvailableOption();
+
+    this.updateFocusedOption(nextOption);
+
+    if (!this.mouseDown && !this.embedded && this.focusVisible != false) {
+      // Only keyboard focus should update focus visible
+      this.updateFocusVisibleOption(nextOption);
+      this.focusVisible = true;
+    }
+  },
+
+  handleOptionSelected(event) {
+    this.selectOption(event.target);
+  },
+
+  handleClick(event) {
+    this.selectOption(event.target);
+    this.removeFocusVisibleOption();
   },
 
   getFirstAvailableOption() {
@@ -52,41 +156,77 @@ const listbox = {
     return options[options.length - 1];
   },
 
-  removeFocusedOption() {
-    for (let option of this.el.querySelectorAll("[data-focused=true]")) {
-      option.removeAttribute("data-focused");
-    }
-    this.el.setAttribute("aria-activedescendant", "");
-  },
-
   updateFocusedOption(el) {
     this.removeFocusedOption();
     this.el.setAttribute("aria-activedescendant", el?.id);
     el?.setAttribute("data-focused", true);
   },
 
-  selectOption(el, isSelected) {
-    if (!this.multiple && isSelected == true) {
-      for (let option of this.el.querySelectorAll("[aria-selected=true]")) {
-        option.setAttribute("aria-selected", false);
-        option.setAttribute("data-selected", false);
-      }
-    }
+  removeFocusedOption() {
+    const el = this.el.querySelector("[data-focused=true]");
+    el?.removeAttribute("data-focused");
+    this.el.setAttribute("aria-activedescendant", "");
+  },
 
-    if (!this.multiple) {
-      this.el.dispatchEvent(
-        new Event("mula:listbox:selection", { bubbles: true })
-      );
-    }
+  updateFocusVisibleOption(el) {
+    this.removeFocusVisibleOption();
+    el?.setAttribute("data-focus-visible", true);
+  },
 
+  removeFocusVisibleOption() {
+    this.el
+      .querySelector("[data-focus-visible='true']")
+      ?.removeAttribute("data-focus-visible");
+  },
+
+  updateOption(el, isSelected) {
     el.setAttribute("aria-selected", isSelected);
     el.setAttribute("data-selected", isSelected);
   },
 
-  toggleSelectedOption(el) {
-    const isSelected = el.getAttribute("aria-selected") == "true";
-    this.selectOption(el, !isSelected);
+  selectOption(el) {
+    this.lastSelectedOption = el;
+
+    if (!this.multiple && this.isSelected(el) == false) {
+      for (let option of this.el.querySelectorAll("[aria-selected=true]")) {
+        this.updateOption(option, false);
+      }
+    }
+
+    this.updateOption(el, !this.isSelected(el));
+    this.updateFocusedOption(el);
+
+    if (!this.multiple) {
+      const value = !this.isSelected(el) ? el.getAttribute("data-value") : null;
+      this.el.dispatchEvent(
+        new CustomEvent(EVENTS.UPDATED, { bubbles: true, detail: value })
+      );
+    }
+  },
+
+  listBetweenChilds(parent, child1, child2) {
+    let between = false;
+    let childs = [];
+
+    if (child1 == child2) return childs;
+
+    for (let el of parent.children) {
+      if (el == child1 || el == child2) {
+        between = !between;
+        continue;
+      }
+
+      if (between) {
+        childs.push(el);
+      }
+    }
+
+    return childs;
+  },
+
+  isSelected(el) {
+    return el.getAttribute("aria-selected") == "true";
   },
 };
 
-export default listbox;
+export { Listbox, EVENTS };
