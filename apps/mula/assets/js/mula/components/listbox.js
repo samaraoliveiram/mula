@@ -11,7 +11,7 @@ const Listbox = {
     const self = this;
 
     this.multiple = this.el.hasAttribute("aria-multiselectable");
-    this.selectedOption = null;
+    this.lastSelectedOption = null;
 
     this._handleDocumentFocus = this.handleDocumentFocus.bind(this);
     this._handleDocumentKeyDown = this.handleDocumentKeyDown.bind(this);
@@ -77,15 +77,22 @@ const Listbox = {
     const cmd = isMacOS() ? metaKey : ctrlKey;
 
     const focusedOption = this.el.querySelector("[data-focused=true]");
-    const selectedOption = this.selectedOption;
+    const lastSelectedOption = this.lastSelectedOption;
     let nextFocusedOption;
 
     if (key == " " || key == "Enter") {
-      this.selectOption(focusedOption);
-
-      if (shiftKey && selectedOption && this.multiple) {
-        this.selectBetweenChilds(this.el, selectedOption, focusedOption);
+      if (shiftKey && lastSelectedOption && this.multiple) {
+        this.listBetweenChilds(
+          this.el,
+          lastSelectedOption,
+          focusedOption
+        ).forEach((child) => {
+          this.updateOption(child, !this.isSelected(focusedOption));
+        });
+        this.updateOption(lastSelectedOption, !this.isSelected(focusedOption));
       }
+
+      this.selectOption(focusedOption);
     } else if (key == "Home" || key == "End") {
       nextFocusedOption =
         key == "Home"
@@ -112,7 +119,7 @@ const Listbox = {
   handleDocumentBlur(event) {
     this.removeFocusedOption();
     this.removeFocusVisibleOption();
-    this.selectedOption = null;
+    // this.selectedOption = null;
   },
 
   handleDocumentFocus(event) {
@@ -172,33 +179,36 @@ const Listbox = {
       ?.removeAttribute("data-focus-visible");
   },
 
-  selectOption(el) {
-    this.selectedOption = el;
-    const isUnselected = el.getAttribute("aria-selected") != "true";
+  updateOption(el, isSelected) {
+    el.setAttribute("aria-selected", isSelected);
+    el.setAttribute("data-selected", isSelected);
+  },
 
-    if (!this.multiple && isUnselected == true) {
+  selectOption(el) {
+    this.lastSelectedOption = el;
+
+    if (!this.multiple && this.isSelected(el) == false) {
       for (let option of this.el.querySelectorAll("[aria-selected=true]")) {
-        option.setAttribute("aria-selected", false);
-        option.setAttribute("data-selected", false);
+        this.updateOption(option, false);
       }
     }
 
-    el.setAttribute("aria-selected", isUnselected);
-    el.setAttribute("data-selected", isUnselected);
-
+    this.updateOption(el, !this.isSelected(el));
     this.updateFocusedOption(el);
 
     if (!this.multiple) {
-      const value = isUnselected ? el.getAttribute("data-value") : null;
+      const value = !this.isSelected(el) ? el.getAttribute("data-value") : null;
       this.el.dispatchEvent(
         new CustomEvent(EVENTS.UPDATED, { bubbles: true, detail: value })
       );
     }
   },
 
-  selectBetweenChilds(parent, child1, child2) {
+  listBetweenChilds(parent, child1, child2) {
     let between = false;
-    if (child1 == child2) return;
+    let childs = [];
+
+    if (child1 == child2) return childs;
 
     for (let el of parent.children) {
       if (el == child1 || el == child2) {
@@ -207,9 +217,15 @@ const Listbox = {
       }
 
       if (between) {
-        this.selectOption(el);
+        childs.push(el);
       }
     }
+
+    return childs;
+  },
+
+  isSelected(el) {
+    return el.getAttribute("aria-selected") == "true";
   },
 };
 
