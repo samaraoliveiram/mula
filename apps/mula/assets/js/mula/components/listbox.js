@@ -24,24 +24,24 @@ const Listbox = {
     this.el.addEventListener("mouseup", this._handleClick, true);
 
     // Workaround to detect if focus comes from mouse or keyboard
-    this.el.addEventListener("mousedown", () => this.mouseDown = true)
-    this.el.addEventListener("mouseup", () => this.mouseDown = false)
+    this.el.addEventListener("mousedown", () => (this.mouseDown = true));
+    this.el.addEventListener("mouseup", () => (this.mouseDown = false));
 
-    this.selectOptionsFromProps()
+    this.selectOptionsFromProps();
 
     // HTMLElement Interoperability Extension Callbacks --------------------------
-    // 
+    //
     // The `listbox` element is queried by higher-level components like `select`.
-    
+
     // This function allows a parent element to control how to focus listbox items
-    this.el.focusChild = function(opts = {}) {
-      self.focusVisible = opts.focusVisible
+    this.el.focusChild = function (opts = {}) {
+      self.focusVisible = opts.focusVisible;
       self.el.focus();
-    }
+    };
   },
 
   updated() {
-    this.selectOptionsFromProps()
+    this.selectOptionsFromProps();
     // this.multiple = this.el.hasAttribute(selectEvent);
   },
 
@@ -58,10 +58,12 @@ const Listbox = {
     const selectedValue = this.el.getAttribute("data-selected-value");
 
     if (selectedValue) {
-      const optionToSelect = this.el.querySelector(`[role='option'][data-value='${selectedValue}']`)
+      const optionToSelect = this.el.querySelector(
+        `[role='option'][data-value='${selectedValue}']`
+      );
 
       if (!optionToSelect) {
-        console.warn(`Option with value ${selectedValue} does not exist`)
+        console.warn(`Option with value ${selectedValue} does not exist`);
         return;
       }
 
@@ -81,19 +83,14 @@ const Listbox = {
     if (key == " " || key == "Enter") {
       this.selectOption(focusedOption);
 
-      if (shiftKey && selectedOption && selectedOption != focusedOption) {
+      if (shiftKey && selectedOption && this.multiple) {
         this.selectBetweenChilds(this.el, selectedOption, focusedOption);
       }
-    } else if (key == "Home") {
-      nextFocusedOption = this.getFirstAvailableOption();
-
-      if (cmd && shiftKey && this.multiple) {
-        this.selectOption(focusedOption);
-        this.selectOption(nextFocusedOption);
-        this.selectBetweenChilds(this.el, nextFocusedOption, focusedOption);
-      }
-    } else if (key == "End") {
-      nextFocusedOption = this.getLastAvailableOption();
+    } else if (key == "Home" || key == "End") {
+      nextFocusedOption =
+        key == "Home"
+          ? this.getFirstAvailableOption()
+          : this.getLastAvailableOption();
 
       if (cmd && shiftKey && this.multiple) {
         this.selectOption(focusedOption);
@@ -127,11 +124,10 @@ const Listbox = {
 
     this.updateFocusedOption(nextOption);
 
-
     if (!this.mouseDown && !this.embedded && this.focusVisible != false) {
       // Only keyboard focus should update focus visible
       this.updateFocusVisibleOption(nextOption);
-      this.focusVisible = true
+      this.focusVisible = true;
     }
   },
 
@@ -193,13 +189,16 @@ const Listbox = {
     this.updateFocusedOption(el);
 
     if (!this.multiple) {
-      const value = isUnselected ? el.getAttribute("data-value") : null
-      this.el.dispatchEvent(new CustomEvent(EVENTS.UPDATED, { bubbles: true, detail: value }));
+      const value = isUnselected ? el.getAttribute("data-value") : null;
+      this.el.dispatchEvent(
+        new CustomEvent(EVENTS.UPDATED, { bubbles: true, detail: value })
+      );
     }
   },
 
   selectBetweenChilds(parent, child1, child2) {
     let between = false;
+    if (child1 == child2) return;
 
     for (let el of parent.children) {
       if (el == child1 || el == child2) {
